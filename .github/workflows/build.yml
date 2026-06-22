@@ -1,0 +1,45 @@
+name: Build NSC-CompileEngine
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout NSC-CompileEngine
+        uses: actions/checkout@v4
+        with:
+          path: NSC_CompileEngine
+
+      - name: Checkout XFBIN_LIB (sibling)
+        uses: actions/checkout@v4
+        with:
+          repository: TheLeonX/XFBIN_LIB
+          path: XFBIN_LIB
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        working-directory: NSC_CompileEngine
+        run: dotnet restore
+
+      - name: Build
+        working-directory: NSC_CompileEngine
+        run: dotnet build -c Release --no-restore
+
+      - name: Publish DLL
+        working-directory: NSC_CompileEngine
+        run: dotnet publish -c Release -o ../publish/NSC_CompileEngine
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NSC_CompileEngine_dll
+          path: publish/NSC_CompileEngine/NSC_CompileEngine.dll
+          retention-days: 30

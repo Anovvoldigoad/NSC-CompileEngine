@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <PlatformTarget>x86</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>NSC_CompileEngine</AssemblyName>
+    <RootNamespace>NSC_CompileEngine</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- XFBIN_LIB harus sejajar folder NSC_CompileEngine saat build -->
+    <ProjectReference Include="..\XFBIN_LIB\XFBIN_LIB.csproj" />
+  </ItemGroup>
+</Project>
