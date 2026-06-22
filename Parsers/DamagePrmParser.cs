@@ -3,6 +3,7 @@
 //           SaveFileDialog, ModernWpf.MessageBox → exceptions/return values
 // Logic: 100% identical to original — offset math, byte layout, header template unchanged.
 using NSC_CompileEngine.Models;
+using static NSC_CompileEngine.BinaryReader;
 
 namespace NSC_CompileEngine.Parsers
 {
@@ -28,13 +29,13 @@ namespace NSC_CompileEngine.Parsers
             FileByte = File.ReadAllBytes(path);
 
             int index = 128;
-            string binPath = BinaryHelper.b_ReadString(FileByte, index);
+            string binPath = BinaryReader.b_ReadString(FileByte, index);
             index += binPath.Length + 2;
 
             string binName = "";
             for (int x = 0; x < 3; x++)
             {
-                string name = BinaryHelper.b_ReadString(FileByte, index);
+                string name = BinaryReader.b_ReadString(FileByte, index);
                 if (x == 0) binName = name;
                 index += name.Length + 1;
             }
@@ -42,15 +43,15 @@ namespace NSC_CompileEngine.Parsers
             if (!binName.Contains("damageprm"))
                 throw new InvalidDataException($"File is not a damageprm xfbin. BinName={binName}");
 
-            int startOfFile = 0x34 + BinaryHelper.b_ReadIntRev(FileByte, 16);
-            int entryCount = BinaryHelper.b_ReadInt(FileByte, startOfFile + 4);
+            int startOfFile = 0x34 + BinaryReader.b_ReadIntRev(FileByte, 16);
+            int entryCount = BinaryReader.b_ReadInt(FileByte, startOfFile + 4);
 
             for (int c = 0; c < entryCount; c++)
             {
                 int ptr = startOfFile + 8 + (c * 0xA0);
                 DamagePrmList.Add(new DamagePrmModel
                 {
-                    Data = BinaryHelper.b_ReadByteArray(FileByte, ptr, 0xA0)
+                    Data = BinaryReader.b_ReadByteArray(FileByte, ptr, 0xA0)
                 });
             }
         }
@@ -107,24 +108,24 @@ namespace NSC_CompileEngine.Parsers
             };
 
             int ptrNucc = fileBytes.Length;
-            fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[1]);
-            fileBytes = BinaryHelper.b_AddString(fileBytes, "D:/next5/branches/masterV110/char_hi/param/player/Converter/bin/damageprm.bin");
-            fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[1]);
+            fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[1]);
+            fileBytes = BinaryReader.b_AddString(fileBytes, "D:/next5/branches/masterV110/char_hi/param/player/Converter/bin/damageprm.bin");
+            fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[1]);
 
             int ptrPath = fileBytes.Length;
-            fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[1]);
-            fileBytes = BinaryHelper.b_AddString(fileBytes, "damageprm");
-            fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[1]);
-            fileBytes = BinaryHelper.b_AddString(fileBytes, "Page0");
-            fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[1]);
-            fileBytes = BinaryHelper.b_AddString(fileBytes, "index");
-            fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[1]);
+            fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[1]);
+            fileBytes = BinaryReader.b_AddString(fileBytes, "damageprm");
+            fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[1]);
+            fileBytes = BinaryReader.b_AddString(fileBytes, "Page0");
+            fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[1]);
+            fileBytes = BinaryReader.b_AddString(fileBytes, "index");
+            fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[1]);
 
             int ptrName = fileBytes.Length;
             int addedBytes = 0;
-            while (fileBytes.Length % 4 != 0) { addedBytes++; fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[1]); }
+            while (fileBytes.Length % 4 != 0) { addedBytes++; fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[1]); }
 
-            fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[48]
+            fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[48]
             {
                 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,
                 0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x00,
@@ -132,7 +133,7 @@ namespace NSC_CompileEngine.Parsers
             });
 
             int ptrSection = fileBytes.Length;
-            fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[16]
+            fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[16]
             { 0,0,0,0,0,0,0,1,0,0,0,2,0,0,0,3 });
 
             int totalLength = fileBytes.Length;
@@ -141,16 +142,16 @@ namespace NSC_CompileEngine.Parsers
             int section1Length = ptrSection - ptrName - addedBytes;
             int fullLength = totalLength - 68 + 40;
 
-            fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(fullLength), 16, 1);
-            fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(2), 36, 1);
-            fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(pathLength), 40, 1);
-            fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(4), 44, 1);
-            fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(nameLength), 48, 1);
-            fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(4), 52, 1);
-            fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(section1Length), 56, 1);
-            fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(4), 60, 1);
+            fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(fullLength), 16, 1);
+            fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(2), 36, 1);
+            fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(pathLength), 40, 1);
+            fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(4), 44, 1);
+            fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(nameLength), 48, 1);
+            fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(4), 52, 1);
+            fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(section1Length), 56, 1);
+            fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(4), 60, 1);
 
-            fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[28]
+            fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[28]
             {
                 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x63,0x79,0x76,0x00,0x00,0x08,0x98,
                 0x00,0x00,0x00,0x01,0x00,0x63,0x79,0x76,0x00,0x00,0x08,0x94
@@ -159,21 +160,21 @@ namespace NSC_CompileEngine.Parsers
             int size1Index = fileBytes.Length - 0x10;
             int size2Index = fileBytes.Length - 0x4;
             int countIndex = fileBytes.Length;
-            fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[4]);
+            fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[4]);
             int startOfFile = fileBytes.Length;
 
-            fileBytes = BinaryHelper.b_AddBytes(fileBytes, new byte[DamagePrmList.Count * 0xA0]);
+            fileBytes = BinaryReader.b_AddBytes(fileBytes, new byte[DamagePrmList.Count * 0xA0]);
             for (int x = 0; x < DamagePrmList.Count; x++)
             {
                 int ptr = startOfFile + (x * 0xA0);
-                fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, DamagePrmList[x].Data, ptr);
+                fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, DamagePrmList[x].Data, ptr);
             }
 
-            fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, BitConverter.GetBytes((DamagePrmList.Count * 0xA0) + 0x8), size1Index, 1);
-            fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, BitConverter.GetBytes((DamagePrmList.Count * 0xA0) + 0x4), size2Index, 1);
-            fileBytes = BinaryHelper.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(DamagePrmList.Count), countIndex);
+            fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, BitConverter.GetBytes((DamagePrmList.Count * 0xA0) + 0x8), size1Index, 1);
+            fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, BitConverter.GetBytes((DamagePrmList.Count * 0xA0) + 0x4), size2Index, 1);
+            fileBytes = BinaryReader.b_ReplaceBytes(fileBytes, BitConverter.GetBytes(DamagePrmList.Count), countIndex);
 
-            return BinaryHelper.b_AddBytes(fileBytes, new byte[20]
+            return BinaryReader.b_AddBytes(fileBytes, new byte[20]
             {
                 0x00,0x00,0x00,0x08,0x00,0x00,0x00,0x02,0x00,0x79,0x8D,0x77,0x00,0x00,0x00,0x04,
                 0x00,0x00,0x00,0x00
